@@ -20,13 +20,13 @@ def DEBUG(s):
 		print s
 
 def privateKey():
-	f = open('/home/dgeo2/amazons3/privatekey', 'rb')
+	f = open('./privatekey', 'rb')
 	theKey = f.read()
 	f.close()
 	return theKey
 
 def publicKey():
-	f = open('/home/dgeo2/amazons3/publickey', 'rb')
+	f = open('./publickey', 'rb')
 	theKey = f.read()
 	f.close()
 	return theKey
