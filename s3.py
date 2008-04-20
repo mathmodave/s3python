@@ -21,8 +21,35 @@ import getopt
 import s3commands
 import s3parser
 
-def usage():
-	print 'RTFM!'
+def usage(onError):
+	if (onError):
+		print "Error - command not recognised"
+	else:
+		print """s3python version 0.1, Copyright (C) 2008 David Oxley
+s3python comes with ABSOLUTELY NO WARRANTY; for details see v2 of the GPL
+This is free software, and you are welcome to redistribute it
+under certain conditions; see v2 of the GPL for details."""
+	print """Usage: s3 [OPTION...] 
+
+Examples:
+  s3 -L                                # List all buckets and their contents
+  s3 -l mybucket                       # List the contents of 'mybucket'
+  s3 -b mybucket -p /foo/bar -k bar    # Upload '/foo/bar' to the key 'bar' in 'mybucket'
+  s3 -b mybucket -g bar -o /foo/bar    # Download the object with key 'bar' from 'mybucket', save as /foo/bar
+  s3 -b mybucket -g bar                # Download the object with key 'bar' from 'mybucket', output to stdout
+  s3 -b mybucket -X bar                # Delete the object with key 'bar' from 'mybucket'
+  s3 -b mybucket -C                    # Create mybucket
+  s3 -b mybucket -D                    # Delete mybucket
+  s3 -b mybucket -k bar -a publicread  # Make the object 'bar' in 'mybucket' publicly readable
+  s3 -b mybucket -k bar -a private     # Remove the public read permission from 'bar' in 'mybucket'
+
+In cases of success, s3python is either silent or will output the HTTP header code to stdout.
+When s3python encounters errors, the full headers and output is sent to stdout.
+
+Two files: publickey and privatekey are expected to be found in the directory containing s3commands.py
+Each of these files should contain the AmazonS3 issued "public" and "private" keys
+
+Report bugs to s3-code@psi.epsilon.org.uk"""
 	sys.exit(-1)
 
 opts_dict = {}
@@ -44,7 +71,7 @@ def processOpts(raw_opts):
 	for x in opts_dict.keys():
 		if (x in exclusive_opts):
 			if exclusiveFlag:
-				usage()
+				usage(True)
 			else:
 				exclusiveFlag = True
 
@@ -67,11 +94,15 @@ def listBucket(theBucket):
 
 if __name__ == '__main__':
 	try:
-		raw_opts, args = getopt.getopt(sys.argv[1:], 'CDLl:p:g:X:o:b:a:k:')
+		raw_opts, args = getopt.getopt(sys.argv[1:], 'hCDLl:p:g:X:o:b:a:k:')
 	except:
-		usage()
+		usage(True)
 
 	processOpts(raw_opts)
+
+	if opts_dict.has_key('h'): # Help
+		usage(False)
+		sys.exit(0)
 
  	if opts_dict.has_key('L'): #List all
 		listAllBuckets()
@@ -82,28 +113,28 @@ if __name__ == '__main__':
 
 	if opts_dict.has_key('D'): # Remove Bucket
 		if (opts('b') == ''):
-			usage()
+			usage(True)
 
 		s3commands.doDeleteBucket(opts('b'))
 		sys.exit(0)
 
 	if opts_dict.has_key('C'): # Create Bucket
 		if (opts('b') == ''):
-			usage()
+			usage(True)
 
 		s3commands.doPutBucket(opts('b'))
 		sys.exit(0)
 
 	if opts_dict.has_key('p'): #Put (Upload)
 		if (opts('b') == '') | (opts('p') == '') | (opts('k') == ''):
-			usage()
+			usage(True)
 
 		s3commands.doPutObjectFromFile(opts('b'), opts('p'), opts('k'))
 		sys.exit(0)
 
 	if opts_dict.has_key('g'): #Get (Download)
 		if (opts('b') == '') | (opts('g') == ''):
-			usage()
+			usage(True)
 	
 		req, header, data = s3commands.doGetObject(opts('b'), opts('g'), opts('o'))
 
@@ -113,7 +144,7 @@ if __name__ == '__main__':
 
 	if opts_dict.has_key('X'): #Delete
 		if (opts('b') == ''):
-			usage()
+			usage(True)
 
 		req, header, data = s3commands.doDeleteObject(opts('b'), opts('X'))
 	
@@ -121,7 +152,7 @@ if __name__ == '__main__':
 
 	if opts_dict.has_key('a'): # ACL
 		if (opts('a') == '') | (opts('b') == '') | (opts('k') == ''):
-			usage()
+			usage(True)
 
 		targetKey = '%s?acl' % opts('k')
 

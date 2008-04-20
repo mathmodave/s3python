@@ -27,22 +27,20 @@ import socketBuffer
 g_DEBUG = False;
 # g_DEBUG = True;
 
-def enableDEBUG():
-	g_DEBUG = True;
-
-
 def DEBUG(s):
 	if (g_DEBUG):
 		print s
 
 def privateKey():
-	f = open('./privatekey', 'rb')
+	privateKey = '/etc/amazons3/privatekey'
+	f = open(privateKey, 'rb')
 	theKey = f.read()
 	f.close()
 	return theKey
 
 def publicKey():
-	f = open('./publickey', 'rb')
+	publicKey = '/etc/amazons3/publickey'
+	f = open(publicKey, 'rb')
 	theKey = f.read()
 	f.close()
 	return theKey
@@ -127,27 +125,20 @@ def putObjectFromFile(bucketName, sourceFilename, destinationFileName):
 
 	fileToSocket(sourceFilename, ssl_sock)
 
-	# response = ssl_sock.read(2048);
 	header, data = readResponse(ssl_sock)
 	cleanupSocket(s, ssl_sock)
 
 	return req, header, data
 
-
-
-
-
-
 def putObject(bucketName, fileName, data):
 	s, ssl_sock = makeSocket()
 
-	req, preData = putObjectReq('%s-%s' % (g_publicKey.lower(), bucketName), fileName, data)
+	req = putObjectReq(bucketName, fileName, data)
 	ssl_sock.write(req)
-	time.sleep(1)
-	data = ssl_sock.read(2048);
+	header, data = readResponse(ssl_sock)
 	cleanupSocket(s, ssl_sock)
 
-	return req, data, preData
+	return req, header, data
 
 def getObject(bucketName, fileName, localTarget):
 	data = ''
@@ -176,13 +167,7 @@ def delObject(bucketName, fileName):
 def getBucket(bucketName):
 	s, ssl_sock = makeSocket()
 
-	DEBUG('in getBucket, made socket')
-
 	req = getBucketReq(bucketName)
-
-	DEBUG('in getBucket, made request')
-
-	DEBUG(req)
 
 	ssl_sock.write(req)
 	header, data = readResponse(ssl_sock)
@@ -222,7 +207,6 @@ def putObjectReq(bucketName, fileName, fileLen):
 	requestString.append('Authorization: AWS %s:%s' % (g_publicKey, getSignatureREST(stringToSign)))
 	requestString.append('\n')
 	requestString = '\n'.join(requestString)
-
 
 	return requestString
 
@@ -380,7 +364,7 @@ def readChunk(theBuf, fileTarget=None):
 
 def readResponseToFile(ssl_sock, targetFile):
 	"""Call when a response is expected on a socket. Function waits for the entire header, 
-	then keeps reading unti the entire body has been read"""
+	then keeps reading until the entire body has been read"""
 	theBuf = socketBuffer.socketBuffer(ssl_sock)
 	
 	# We don't know in advance how big the header will be.
@@ -533,19 +517,3 @@ def doDeleteObject(bucketName, fileName):
 
 	return req, header, data
 
-if __name__ == '__main__x':
-
-	if sys.argv[1] == 'list':
-		bucketList = doListAllBuckets()
-		for bucket in bucketList:
-			print bucket.name
-			keyList = doGetBucket(bucket.name)
-			for key in keyList:
-				print '',
-				key.dump()
-	elif sys.argv[1] == 'upload':
-		doPutObjectFromFile(sys.argv[2], sys.argv[3], sys.argv[4])
-	elif sys.argv[1] == 'download':
-		doGetObject(sys.argv[2], sys.argv[3], sys.argv[4])	
-	elif sys.argv[1] == 'delete':
-		doDeleteObject(sys.argv[2], sys.argv[3])
