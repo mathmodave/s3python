@@ -77,6 +77,7 @@ def processOpts(raw_opts):
 
 
 def listAllBuckets():
+	size = 0
 	bucketList = s3commands.doListAllBuckets()
 	for bucket in bucketList:
 		print bucket.name
@@ -84,6 +85,8 @@ def listAllBuckets():
 		for key in keyList:
 			print '',
 			key.dump()
+			size += key.size
+	print '\nTotal Usage: %s' % human(size)
 
 def listBucket(theBucket):
 	keyList = s3commands.doGetBucket(theBucket)
@@ -91,6 +94,14 @@ def listBucket(theBucket):
 		print '',
 		key.dump()
 
+def human(size):
+	mult = 0
+	suffix = ['', 'k', 'M', 'G']
+	while (size > 1024):
+		size /= 1024
+		mult += 1
+	
+	return '%d%s' % (size, suffix[mult])
 
 if __name__ == '__main__':
 	try:

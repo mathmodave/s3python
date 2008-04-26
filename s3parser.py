@@ -109,7 +109,7 @@ class s3File(object):
 		return self._size
 	
 	def setSize(self, newValue):
-		self._size = newValue
+		self._size = int(newValue)
 
 	key = property(getKey, setKey)
 	size = property(getSize, setSize)
