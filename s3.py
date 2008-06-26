@@ -96,12 +96,18 @@ def listBucket(theBucket):
 
 def human(size):
 	mult = 0
-	suffix = ['', 'k', 'M', 'G']
+	suffix = ['', 'k', 'M', 'G', 'T']
 	while (size > 1024):
-		size /= 1024
+		size /= 1024.0
 		mult += 1
+		if mult == len(suffix) - 1:
+			break
 	
-	return '%d%s' % (size, suffix[mult])
+	if mult >= 3:
+		return '%1.2f%s' % (size, suffix[mult])
+	else:
+		return '%1.0f%s' % (size, suffix[mult])
+		
 
 if __name__ == '__main__':
 	try:

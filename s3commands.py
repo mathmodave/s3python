@@ -113,12 +113,12 @@ def putBucket(bucketName):
 
 	return req, header, data
 
-def putObjectFromFile(bucketName, sourceFilename, destinationFileName):
+def putObjectFromFile(bucketName, sourceFilename, destinationFileName, publicRead=False):
 	s, ssl_sock = makeSocket()
 
 	statInfo = os.stat(sourceFilename)
 
-	req = putObjectReq(bucketName, destinationFileName, statInfo.st_size)
+	req = putObjectReq(bucketName, destinationFileName, statInfo.st_size, publicRead)
 	ssl_sock.write(req)
 
 	DEBUG(statInfo.st_size)
@@ -130,10 +130,10 @@ def putObjectFromFile(bucketName, sourceFilename, destinationFileName):
 
 	return req, header, data
 
-def putObject(bucketName, fileName, data):
+def putObject(bucketName, fileName, data, publicRead=False):
 	s, ssl_sock = makeSocket()
 
-	req = putObjectReq(bucketName, fileName, data)
+	req = putObjectReq(bucketName, fileName, data, publicRead)
 	ssl_sock.write(req)
 	header, data = readResponse(ssl_sock)
 	cleanupSocket(s, ssl_sock)
@@ -185,7 +185,7 @@ def delBucket(bucketName):
 
 	return req, header, data
 
-def putObjectReq(bucketName, fileName, fileLen):
+def putObjectReq(bucketName, fileName, fileLen, publicRead=False):
 	timeString = getTimeString()
 
 	stringToSign = []
@@ -193,14 +193,16 @@ def putObjectReq(bucketName, fileName, fileLen):
 	stringToSign.append('')
 	stringToSign.append('application/octet-stream')
 	stringToSign.append(timeString)
-	# stringToSign.append('x-amz-acl:public-read')
+	if publicRead:
+		stringToSign.append('x-amz-acl:public-read')
 	stringToSign.append('/%s/%s' % (bucketName, fileName))
 	stringToSign = '\n'.join(stringToSign)
 	
 	requestString = []
 	requestString.append('PUT /%s HTTP/1.1' % fileName)
 	requestString.append('Content-Type: application/octet-stream')
-	# requestString.append('x-amz-acl: public-read')
+	if publicRead:
+		requestString.append('x-amz-acl: public-read')
 	requestString.append('Content-Length: %d' % fileLen)
 	requestString.append('Host: %s.s3.amazonaws.com' % bucketName)
 	requestString.append('Date: %s' % timeString)
@@ -474,8 +476,8 @@ def doPutBucket(bucketName):
 	else:
 		print header[0][:-2] # Strip off /r/n
 
-def doPutObjectFromFile(bucketName, localFile, targetFile):
-	req, header, data = putObjectFromFile(bucketName, localFile, targetFile)
+def doPutObjectFromFile(bucketName, localFile, targetFile, publicRead=False):
+	req, header, data = putObjectFromFile(bucketName, localFile, targetFile, publicRead)
 
 	DEBUG(header)
 	if (header[0][:-2] != 'HTTP/1.1 200 OK'):
