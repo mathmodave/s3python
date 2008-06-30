@@ -168,7 +168,7 @@ if __name__ == '__main__':
 		sys.exit(0)
 
 	if opts_dict.has_key('a'): # ACL
-		if (opts('a') == '') | (opts('b') == '') | (opts('k') == ''):
+		if (opts('a') == '') | (opts('b') == ''):
 			usage(True)
 
 		targetKey = '%s?acl' % opts('k')

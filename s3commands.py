@@ -442,7 +442,7 @@ def fileToSocket(sourceFileName, ssl_sock):
 	f = open(sourceFileName, 'rb')
 	
 	while True:
-		buf = f.read(10240)
+		buf = f.read(10180)
 		bufLen = len(buf)
 		if bufLen == 0: break
 		ssl_sock.write(buf)
