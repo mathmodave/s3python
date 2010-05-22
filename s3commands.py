@@ -14,12 +14,17 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+#
+# $Id: s3commands.py 145 2010-05-22 19:48:29Z dgeo2 $
+#
+
 import time
 import socket
 import hmac
 import base64
-import sha
+import hashlib
 import os
+import ssl
 import sys
 import s3parser
 import socketBuffer
@@ -49,7 +54,7 @@ g_publicKey = publicKey()
 
 def getSignatureREST(stringToSign):
 	sigString = stringToSign.encode("UTF-8")
-	hm = hmac.new(privateKey(), sigString, sha)
+	hm = hmac.new(privateKey(), sigString, hashlib.sha1)
 
 	return base64.b64encode(hm.digest())
 
@@ -60,7 +65,7 @@ def getTimeString():
 def makeSocket():
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect(('s3.amazonaws.com', 443))
-	ssl_sock = socket.ssl(s)
+	ssl_sock = ssl.wrap_socket(s)
 
 	return s, ssl_sock
 
