@@ -1,0 +1,24 @@
+A centralised set of python procedures/functions that may form the basis of a fully featured program utilising Amazon's S3 service.
+
+The source included is enough to complete the following functions:
+
+List All Buckets
+List Contents of an individual bucket
+Create Bucket
+Delete Empty Bucket
+Upload a file from the local filesystem into a specified bucket
+Download a file from a specified bucket either to stdout or the local filesystem
+Delete a file from a specified bucket
+Add and Remove the READ permission from the AllUsers? group.
+Documentation is admittedly lacking
+
+Test harness is also admittedly lacking
+
+s3commands.py is intended as an API to be called from other programs s3.py is intended to be used from the command line to manipulate the file store
+
+Before using the above, you will have to edit s3commands.py to point it at the location of two files which contain the two keys ("public/private") that are provided by Amazon S3.
+
+==
+
+This project was initially hosted within code.google.com: http://code.google.com/p/s3python/
+It moved to github on 10th March 2012
