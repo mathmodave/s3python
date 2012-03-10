@@ -35,14 +35,14 @@ def DEBUG(s):
 def privateKey():
 	privateKey = '/etc/amazons3/privatekey'
 	f = open(privateKey, 'rb')
-	theKey = f.read()
+	theKey = f.read().strip()
 	f.close()
 	return theKey
 
 def publicKey():
 	publicKey = '/etc/amazons3/publickey'
 	f = open(publicKey, 'rb')
-	theKey = f.read()
+	theKey = f.read().strip()
 	f.close()
 	return theKey
 
