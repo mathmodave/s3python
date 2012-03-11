@@ -156,7 +156,7 @@ if __name__ == '__main__':
 		req, header, data = s3commands.doGetObject(opts('b'), opts('g'), opts('o'))
 
 		if (opts('o') == ''):
-			print data
+			print data,
 		sys.exit(0)
 
 	if opts_dict.has_key('X'): #Delete
